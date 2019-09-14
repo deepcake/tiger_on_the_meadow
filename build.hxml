@@ -1,0 +1,8 @@
+-cp src
+-lib echos
+-main Main
+-js bin/main.js
+-dce full
+-D analyzer-optimize
+-D echos_profiling
+-D echos_report
