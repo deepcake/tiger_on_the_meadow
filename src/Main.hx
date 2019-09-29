@@ -21,7 +21,7 @@ class Main {
 
     static function main() {
         var canvas = Browser.document.createDivElement();
-        canvas.classList.add('meatdow');
+        canvas.classList.add('meadow');
 
         var info = Browser.document.createPreElement();
         info.classList.add('info');
