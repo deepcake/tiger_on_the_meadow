@@ -28,7 +28,7 @@ class Builder {
     public static function tree(x:Float, y:Float) {
         new Entity().add(
             new Position(x, y), 
-            new Sprite(getRandomEmoji(TREE), 1.75 + Math.random() * 0.25)
+            new Sprite(getRandomEmoji(TREE), 1.50 + Math.random() * 0.50)
         );
     }
 
@@ -42,14 +42,14 @@ class Builder {
     public static function rabbit(x:Float, y:Float):Entity {
         var pos = new Position(x, y);
         var vel = getRandomVelocity(1);
-        var spr = new Sprite(RABBIT, 1.0);
+        var spr = new Sprite(RABBIT, 1.00);
         return new Entity().add(pos, vel, spr, Rabbit);
     }
 
     public static function tiger(x:Float, y:Float):Entity {
         var pos = new Position(x, y);
         var vel = getRandomVelocity(7.5);
-        var spr = new Sprite(TIGER, 1.5);
+        var spr = new Sprite(TIGER, 1.50);
         return new Entity().add(pos, vel, spr, Tiger);
     }
 
@@ -57,13 +57,13 @@ class Builder {
     public static function newGhost(x:Float, y:Float):Entity {
         var pos = new Position(x, y);
         var vel = getRandomVelocity(2);
-        var spr = new Sprite(GHOST, 1.0);
+        var spr = new Sprite(GHOST, 1.00);
         return new Entity().add(pos, vel, spr);
     }
 
     public static function newMeat(x:Float, y:Float):Entity {
         var pos = new Position(x, y);
-        var spr = new Sprite(MEAT, 1.0);
+        var spr = new Sprite(MEAT, 1.00);
         return new Entity().add(pos, spr);
     }
 

@@ -31,13 +31,8 @@ class Main {
 
         // make it mobile friendly (i guess)
         SIZE = Std.parseInt(Browser.window.getComputedStyle(canvas).fontSize);
-
         WIDTH = Math.floor(Browser.window.innerWidth / SIZE);
         HEIGHT = Math.floor(Browser.window.innerHeight / SIZE);
-
-        var population = Std.int(Math.max(WIDTH * HEIGHT * 0.02, 10));
-
-        trace(WIDTH, HEIGHT, population);
 
         Workflow.addSystem(new Interaction());
         Workflow.addSystem(new Movement(WIDTH, HEIGHT));
@@ -58,6 +53,10 @@ class Main {
                 }
             }
         }
+
+        var population = Std.int(Math.max(WIDTH * HEIGHT * 0.02, 10));
+
+        trace(WIDTH, HEIGHT, population);
 
         // some rabbits
         for (i in 0...population) {
