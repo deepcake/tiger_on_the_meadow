@@ -14,7 +14,9 @@ import js.html.Element;
 class Main {
 
 
-    static var SIZE:Int;
+    public static var WIDTH:Int;
+    public static var HEIGHT:Int;
+    public static var SIZE:Int;
 
 
     static function main() {
@@ -30,19 +32,21 @@ class Main {
         // make it mobile friendly (i guess)
         SIZE = Std.parseInt(Browser.window.getComputedStyle(canvas).fontSize);
 
-        var w = Math.floor(Browser.window.innerWidth / SIZE);
-        var h = Math.floor(Browser.window.innerHeight / SIZE);
+        WIDTH = Math.floor(Browser.window.innerWidth / SIZE);
+        HEIGHT = Math.floor(Browser.window.innerHeight / SIZE);
 
-        var population = Std.int(Math.max(w * h / 50, 10));
+        var population = Std.int(Math.max(WIDTH * HEIGHT * 0.02, 10));
+
+        trace(WIDTH, HEIGHT, population);
 
         Workflow.addSystem(new Interaction());
-        Workflow.addSystem(new Movement(w, h));
-        Workflow.addSystem(new Render(w, h, SIZE, canvas));
+        Workflow.addSystem(new Movement(WIDTH, HEIGHT));
+        Workflow.addSystem(new Render(WIDTH, HEIGHT, SIZE, canvas));
         Workflow.addSystem(new TweenUpdate());
 
         // fill world by plants
-        for (y in 0...h) {
-            for (x in 0...w) {
+        for (y in 0...HEIGHT) {
+            for (x in 0...WIDTH) {
                 if (Math.random() < .75) {
                     grass(x, y); 
                 } else {
@@ -57,14 +61,13 @@ class Main {
 
         // some rabbits
         for (i in 0...population) {
-            rabbit(Std.random(w), Std.random(h));
+            rabbit(Std.random(WIDTH), Std.random(HEIGHT));
         }
 
         // tiger!
-        tiger(Std.random(w), Std.random(h));
+        tiger(Std.random(WIDTH), Std.random(HEIGHT));
 
-        var fps = 60;
-        Browser.window.setInterval(function() Workflow.update(fps / 1000), fps);
+        Browser.window.setInterval(function() Workflow.update(60 / 1000), 60);
     }
 
 }

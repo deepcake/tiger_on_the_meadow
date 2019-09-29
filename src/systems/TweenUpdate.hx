@@ -8,17 +8,18 @@ class TweenUpdate extends System {
     @u function update(entity:Entity, t:Tween, dt:Float) {
         if (t.time < t.timeout) {
             if (t.onUpdate != null) {
-                t.onUpdate(entity, t.time / t.timeout);
+                t.onUpdate(t.time / t.timeout);
             }
+            t.time += dt;
         } else {
             if (t.onUpdate != null) {
-                t.onUpdate(entity, 1.0);
+                t.onUpdate(1.0);
             }
             if (t.onComplete != null) {
-                t.onComplete(entity);
+                t.onComplete();
             }
+            entity.destroy();
         }
-        t.time += dt;
     }
 
 }

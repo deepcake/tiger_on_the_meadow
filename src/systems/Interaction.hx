@@ -2,41 +2,47 @@ package systems;
 
 import echos.*;
 import components.*;
+import Builder.*;
 
 class Interaction extends System {
 
-    var animals:View<Animal->Position>;
+
+    var animals:View<Animal, Position>;
+
 
     @u inline function interaction(dt:Float) {
+        // micro optimizaion to not test each entity twice
         var h1 = animals.entities.head;
         while (h1 != null) {
 
+            var entity1 = h1.value;
+            var a1 = entity1.get(Animal);
+            var pos1 = entity1.get(Position);
+
             var h2 = h1.next;
             while (h2 != null) {
-
-                var entity1 = h1.value;
-                var a1 = entity1.get(Animal);
-                var pos1 = entity1.get(Position);
 
                 var entity2 = h2.value;
                 var a2 = entity2.get(Animal);
                 var pos2 = entity2.get(Position);
 
-                if (test(pos1, pos2, 15)) {
+                if (test(pos1, pos2, 1.0)) {
 
                     switch (a1) {
                         case Tiger: {
                             switch (a2) {
-                                case Rabbit: {
-                                    eats(entity1, entity2);
+                                case Tiger: {
+
                                 }
-                                default: 
+                                case Rabbit: {
+                                    tigerEatsRabbit(entity1, entity2);
+                                }
                             }
                         }
                         case Rabbit: {
                             switch (a2) {
                                 case Tiger: {
-                                    eats(entity2, entity1);
+                                    tigerEatsRabbit(entity2, entity1);
                                 }
                                 case Rabbit: {
 
@@ -54,8 +60,9 @@ class Interaction extends System {
         }
     }
 
-    function eats(tiger:Entity, rabbit:Entity) {
+    function tigerEatsRabbit(tiger:Entity, rabbit:Entity) {
         trace('#$tiger eats #$rabbit');
+        newRabbitDeath(rabbit.get(Position).x, rabbit.get(Position).y);
         rabbit.destroy();
     }
 
@@ -64,5 +71,6 @@ class Interaction extends System {
         var dy = pos2.y - pos1.y;
         return dx * dx + dy * dy < radius * radius;
     }
+
 
 }

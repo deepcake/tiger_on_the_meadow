@@ -6,10 +6,10 @@ class Tween {
 
     public var time:Float;
     public var timeout:Float;
-    public var onUpdate:Entity->Float->Void;
-    public var onComplete:Entity->Void;
+    public var onUpdate:Float->Void;
+    public var onComplete:Void->Void;
 
-    public function new(timeout:Float, ?onUpdate:Entity->Float->Void, ?onComplete:Entity->Void) {
+    public function new(timeout:Float, ?onUpdate:Float->Void, ?onComplete:Void->Void) {
         this.time = .0;
         this.timeout = timeout;
         this.onUpdate = onUpdate;

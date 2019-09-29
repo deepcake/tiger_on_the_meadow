@@ -15,12 +15,14 @@ abstract Sprite(Element) from Element to Element {
         setSize(size);
     }
 
-    public inline function setOpacity(value:Float) {
+    public inline function setOpacity(value:Float):Sprite {
         this.style.opacity = '${ value }';
+        return this;
     }
 
-    public inline function setSize(value:Float) {
+    public inline function setSize(value:Float):Sprite {
         this.style.fontSize = '${ Std.int(value * 100) }%';
+        return this;
     }
 
 }
