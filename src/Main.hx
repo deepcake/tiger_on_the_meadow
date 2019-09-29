@@ -34,10 +34,11 @@ class Main {
         WIDTH = Math.floor(Browser.window.innerWidth / SIZE);
         HEIGHT = Math.floor(Browser.window.innerHeight / SIZE);
 
-        Workflow.addSystem(new Interaction());
         Workflow.addSystem(new Movement(WIDTH, HEIGHT));
+        Workflow.addSystem(new Interaction());
         Workflow.addSystem(new Render(WIDTH, HEIGHT, SIZE, canvas));
         Workflow.addSystem(new TweenUpdate());
+        Workflow.addSystem(new InfoPrinter(info));
 
         // fill world by plants
         for (y in 0...HEIGHT) {

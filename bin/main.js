@@ -297,7 +297,10 @@ var echos_utils_LinkedList = function() {
 };
 echos_utils_LinkedList.__name__ = true;
 echos_utils_LinkedList.prototype = {
-	add: function(value) {
+	iterator: function() {
+		return new echos_utils_LinkedListIterator(this.head);
+	}
+	,add: function(value) {
 		var node = new echos_utils_LinkedNode(value);
 		if(this.head == null) {
 			this.head = node;
@@ -341,6 +344,23 @@ echos_utils_LinkedList.prototype = {
 };
 var echos_Workflow = function() { };
 echos_Workflow.__name__ = true;
+echos_Workflow.info = function() {
+	var ret = "# ( " + echos_Workflow.systems.length + " ) { " + echos_Workflow.views.length + " } [ " + echos_Workflow.entities.length + " | " + echos_Workflow.idPool.length + " ]";
+	ret += " : " + echos_Workflow.updateTime + " ms";
+	var _g_node = echos_Workflow.systems.head;
+	while(_g_node != null) {
+		var value = _g_node.value;
+		_g_node = _g_node.next;
+		ret += "\n" + value.info("    ");
+	}
+	var _g1_node = echos_Workflow.views.head;
+	while(_g1_node != null) {
+		var value1 = _g1_node.value;
+		_g1_node = _g1_node.next;
+		ret += "\n    {" + Std.string(value1) + "} [" + value1.entities.length + "]";
+	}
+	return ret;
+};
 echos_Workflow.update = function(dt) {
 	var timestamp = new Date().getTime();
 	var _g_node = echos_Workflow.systems.head;
@@ -465,6 +485,33 @@ ContainerOfComponentsVelocity.prototype = {
 		this.storage.remove(id);
 	}
 };
+var HxOverrides = function() { };
+HxOverrides.__name__ = true;
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
+};
+var Lambda = function() { };
+Lambda.__name__ = true;
+Lambda.count = function(it,pred) {
+	var n = 0;
+	if(pred == null) {
+		var _ = $getIterator(it);
+		while(_.hasNext()) {
+			_.next();
+			++n;
+		}
+	} else {
+		var x = $getIterator(it);
+		while(x.hasNext()) if(pred(x.next())) {
+			++n;
+		}
+	}
+	return n;
+};
 var Main = function() { };
 Main.__name__ = true;
 Main.main = function() {
@@ -477,10 +524,11 @@ Main.main = function() {
 	Main.SIZE = Std.parseInt(window.getComputedStyle(canvas).fontSize);
 	Main.WIDTH = Math.floor(window.innerWidth / Main.SIZE);
 	Main.HEIGHT = Math.floor(window.innerHeight / Main.SIZE);
-	echos_Workflow.addSystem(new systems_Interaction());
 	echos_Workflow.addSystem(new systems_Movement(Main.WIDTH,Main.HEIGHT));
+	echos_Workflow.addSystem(new systems_Interaction());
 	echos_Workflow.addSystem(new systems_Render(Main.WIDTH,Main.HEIGHT,Main.SIZE,canvas));
 	echos_Workflow.addSystem(new systems_TweenUpdate());
+	echos_Workflow.addSystem(new systems_InfoPrinter(info));
 	var _g = 0;
 	var _g1 = Main.HEIGHT;
 	while(_g < _g1) {
@@ -499,7 +547,7 @@ Main.main = function() {
 		}
 	}
 	var population = Math.max(Main.WIDTH * Main.HEIGHT * 0.02,10) | 0;
-	haxe_Log.trace(Main.WIDTH,{ fileName : "src/Main.hx", lineNumber : 59, className : "Main", methodName : "main", customParams : [Main.HEIGHT,population]});
+	haxe_Log.trace(Main.WIDTH,{ fileName : "src/Main.hx", lineNumber : 60, className : "Main", methodName : "main", customParams : [Main.HEIGHT,population]});
 	var _g21 = 0;
 	while(_g21 < population) {
 		++_g21;
@@ -568,7 +616,47 @@ echos_core_AbstractView.prototype = {
 			this.remove(id);
 		}
 	}
+	,toString: function() {
+		return "AbstractView";
+	}
 };
+var ViewOfComponentsAnimal = function() {
+	this.onRemoved = new echos_utils_LinkedList();
+	this.onAdded = new echos_utils_LinkedList();
+	echos_core_AbstractView.call(this);
+	echos_Workflow.definedViews.push(this);
+};
+ViewOfComponentsAnimal.__name__ = true;
+ViewOfComponentsAnimal.inst = function() {
+	return ViewOfComponentsAnimal.instance;
+};
+ViewOfComponentsAnimal.__super__ = echos_core_AbstractView;
+ViewOfComponentsAnimal.prototype = $extend(echos_core_AbstractView.prototype,{
+	add: function(id) {
+		echos_core_AbstractView.prototype.add.call(this,id);
+		var _g_node = this.onAdded.head;
+		while(_g_node != null) {
+			var value = _g_node.value;
+			_g_node = _g_node.next;
+			value(id,ContainerOfComponentsAnimal.instance.storage.h[id]);
+		}
+	}
+	,remove: function(id) {
+		var _g_node = this.onRemoved.head;
+		while(_g_node != null) {
+			var value = _g_node.value;
+			_g_node = _g_node.next;
+			value(id,ContainerOfComponentsAnimal.instance.storage.h[id]);
+		}
+		echos_core_AbstractView.prototype.remove.call(this,id);
+	}
+	,isMatch: function(id) {
+		return ContainerOfComponentsAnimal.instance.storage.h[id] != null;
+	}
+	,toString: function() {
+		return "components.Animal";
+	}
+});
 var ViewOfComponentsAnimal_$ComponentsPosition = function() {
 	this.onRemoved = new echos_utils_LinkedList();
 	this.onAdded = new echos_utils_LinkedList();
@@ -605,6 +693,9 @@ ViewOfComponentsAnimal_$ComponentsPosition.prototype = $extend(echos_core_Abstra
 		} else {
 			return false;
 		}
+	}
+	,toString: function() {
+		return "components.Animal+components.Position";
 	}
 });
 var ViewOfComponentsPosition_$ComponentsSprite = function() {
@@ -643,6 +734,9 @@ ViewOfComponentsPosition_$ComponentsSprite.prototype = $extend(echos_core_Abstra
 		} else {
 			return false;
 		}
+	}
+	,toString: function() {
+		return "components.Position+components.Sprite";
 	}
 });
 var ViewOfComponentsPosition_$ComponentsSprite_$ComponentsVelocity = function() {
@@ -686,6 +780,9 @@ ViewOfComponentsPosition_$ComponentsSprite_$ComponentsVelocity.prototype = $exte
 			return false;
 		}
 	}
+	,toString: function() {
+		return "components.Velocity+components.Position+components.Sprite";
+	}
 });
 var ViewOfComponentsPosition_$ComponentsVelocity = function() {
 	this.onRemoved = new echos_utils_LinkedList();
@@ -724,6 +821,9 @@ ViewOfComponentsPosition_$ComponentsVelocity.prototype = $extend(echos_core_Abst
 			return false;
 		}
 	}
+	,toString: function() {
+		return "components.Position+components.Velocity";
+	}
 });
 var ViewOfComponentsTween = function() {
 	this.onRemoved = new echos_utils_LinkedList();
@@ -757,6 +857,9 @@ ViewOfComponentsTween.prototype = $extend(echos_core_AbstractView.prototype,{
 	}
 	,isMatch: function(id) {
 		return ContainerOfComponentsTween.instance.storage.h[id] != null;
+	}
+	,toString: function() {
+		return "components.Tween";
 	}
 });
 var components_Animal = $hxEnums["components.Animal"] = { __ename__ : true, __constructs__ : ["Rabbit","Tiger"]
@@ -795,11 +898,34 @@ echos_System.prototype = {
 	}
 	,__update__: function(dt) {
 	}
+	,info: function(indent) {
+		if(indent == null) {
+			indent = "";
+		}
+		return "" + indent + "(" + Std.string(this) + ") : " + this.__updateTime__ + " ms";
+	}
+	,toString: function() {
+		return "System";
+	}
 };
 var echos_utils_LinkedNode = function(value) {
 	this.value = value;
 };
 echos_utils_LinkedNode.__name__ = true;
+var echos_utils_LinkedListIterator = function(node) {
+	this.node = node;
+};
+echos_utils_LinkedListIterator.__name__ = true;
+echos_utils_LinkedListIterator.prototype = {
+	hasNext: function() {
+		return this.node != null;
+	}
+	,next: function() {
+		var value = this.node.value;
+		this.node = this.node.next;
+		return value;
+	}
+};
 var haxe_Log = function() { };
 haxe_Log.__name__ = true;
 haxe_Log.formatOutput = function(v,infos) {
@@ -940,6 +1066,36 @@ js_Boot.__string_rec = function(o,s) {
 		return String(o);
 	}
 };
+var systems_InfoPrinter = function(element) {
+	this.animals = ViewOfComponentsAnimal.instance;
+	echos_System.call(this);
+	this.element = element;
+};
+systems_InfoPrinter.__name__ = true;
+systems_InfoPrinter.__super__ = echos_System;
+systems_InfoPrinter.prototype = $extend(echos_System.prototype,{
+	print: function() {
+		var tmp = echos_Workflow.info();
+		this.element.innerHTML = "" + tmp;
+		this.element.innerHTML += "\n\nRABBITS: " + Lambda.count(this.animals.entities,function(e) {
+			return ContainerOfComponentsAnimal.instance.storage.h[e] == components_Animal.Rabbit;
+		});
+		this.element.innerHTML += "\n\nTIGERS: " + Lambda.count(this.animals.entities,function(e1) {
+			return ContainerOfComponentsAnimal.instance.storage.h[e1] == components_Animal.Tiger;
+		});
+	}
+	,__update__: function(__dt__) {
+		var __timestamp__ = new Date().getTime();
+		this.print();
+		this.__updateTime__ = new Date().getTime() - __timestamp__ | 0;
+	}
+	,__activate__: function() {
+		this.animals.activate();
+	}
+	,toString: function() {
+		return "systems.InfoPrinter";
+	}
+});
 var systems_Interaction = function() {
 	this.animals = ViewOfComponentsAnimal_$ComponentsPosition.instance;
 	echos_System.call(this);
@@ -999,6 +1155,9 @@ systems_Interaction.prototype = $extend(echos_System.prototype,{
 	,__activate__: function() {
 		this.animals.activate();
 	}
+	,toString: function() {
+		return "systems.Interaction";
+	}
 });
 var systems_Movement = function(w,h) {
 	this.viewofcomponentsposition_componentsvelocity = ViewOfComponentsPosition_$ComponentsVelocity.instance;
@@ -1035,6 +1194,9 @@ systems_Movement.prototype = $extend(echos_System.prototype,{
 	}
 	,__activate__: function() {
 		this.viewofcomponentsposition_componentsvelocity.activate();
+	}
+	,toString: function() {
+		return "systems.Movement";
 	}
 });
 var systems_Render = function(w,h,size,canvas) {
@@ -1096,6 +1258,9 @@ systems_Render.prototype = $extend(echos_System.prototype,{
 			f(value,ContainerOfComponentsPosition.instance.storage.h[value],ContainerOfComponentsSprite.instance.storage.h[value]);
 		}
 	}
+	,toString: function() {
+		return "systems.Render";
+	}
 });
 var systems_TweenUpdate = function() {
 	this.viewofcomponentstween = ViewOfComponentsTween.instance;
@@ -1134,7 +1299,11 @@ systems_TweenUpdate.prototype = $extend(echos_System.prototype,{
 	,__activate__: function() {
 		this.viewofcomponentstween.activate();
 	}
+	,toString: function() {
+		return "systems.TweenUpdate";
+	}
 });
+function $getIterator(o) { if( o instanceof Array ) return HxOverrides.iter(o); else return o.iterator(); }
 String.__name__ = true;
 Array.__name__ = true;
 Date.__name__ = "Date";
@@ -1163,11 +1332,13 @@ ContainerOfComponentsPosition.instance = new ContainerOfComponentsPosition();
 ContainerOfComponentsSprite.instance = new ContainerOfComponentsSprite();
 ContainerOfComponentsTween.instance = new ContainerOfComponentsTween();
 ContainerOfComponentsVelocity.instance = new ContainerOfComponentsVelocity();
+ViewOfComponentsAnimal.instance = new ViewOfComponentsAnimal();
 ViewOfComponentsAnimal_$ComponentsPosition.instance = new ViewOfComponentsAnimal_$ComponentsPosition();
 ViewOfComponentsPosition_$ComponentsSprite.instance = new ViewOfComponentsPosition_$ComponentsSprite();
 ViewOfComponentsPosition_$ComponentsSprite_$ComponentsVelocity.instance = new ViewOfComponentsPosition_$ComponentsSprite_$ComponentsVelocity();
 ViewOfComponentsPosition_$ComponentsVelocity.instance = new ViewOfComponentsPosition_$ComponentsVelocity();
 ViewOfComponentsTween.instance = new ViewOfComponentsTween();
+systems_InfoPrinter.__meta__ = { fields : { print : { u : null}}};
 systems_TweenUpdate.__meta__ = { fields : { update : { u : null}}};
 Main.main();
 })({});
