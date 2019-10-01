@@ -1,6 +1,6 @@
 package;
 
-import echos.Workflow;
+import echoes.Workflow;
 import components.*;
 import systems.*;
 import Builder.*;

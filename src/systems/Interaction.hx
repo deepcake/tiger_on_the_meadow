@@ -1,6 +1,6 @@
 package systems;
 
-import echos.*;
+import echoes.*;
 import components.*;
 import Builder.*;
 

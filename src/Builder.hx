@@ -1,6 +1,6 @@
 package;
 
-import echos.Entity;
+import echoes.Entity;
 import components.*;
 import components.Animal;
 

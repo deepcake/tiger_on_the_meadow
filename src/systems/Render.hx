@@ -1,6 +1,6 @@
 package systems;
 
-import echos.*;
+import echoes.*;
 import components.*;
 import js.html.Element;
 import js.Browser;

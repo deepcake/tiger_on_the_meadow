@@ -1,6 +1,6 @@
 package components;
 
-import echos.Entity;
+import echoes.Entity;
 
 class Tween {
 
