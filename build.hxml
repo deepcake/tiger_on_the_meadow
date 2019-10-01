@@ -4,5 +4,6 @@
 -js bin/main.js
 -dce full
 -D analyzer-optimize
+-D js-es=6
 -D echoes_profiling
 -D echoes_report
